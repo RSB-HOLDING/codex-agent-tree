@@ -4,25 +4,50 @@
 
 A small, portable Codex skill for selective delegation with one accountable integrator. The root chooses which branches help, combines their work, and verifies the result.
 
-```text
-                     Root / orchestrator
-                     GPT-6.1 Sol · high
-                              |
-              +---------------+---------------+
-              |               |               |
-          Explorer          Worker        Researcher
-          reads code     edits + tests    looks up docs
-          Sol · medium   Sol · medium     Sol · medium
-              |               |               |
-              +---------------+---------------+
-                              |
-                     Integrate + verify
-                     GPT-6.1 Sol · high
-                              |
-                    Big changes only:
-                          Reviewer
-                    GPT-6 Astra · xhigh
+## How the team works
+
+The **root agent leads the task from start to finish**. It delegates only the work that benefits from another agent, then brings the results together and checks them.
+
+```mermaid
+flowchart TD
+    Task([Your task]) --> Root["Root · Plan the work<br/>Choose which help is useful"]
+
+    Root -.-> Explorer["Explorer<br/>Find how the code works"]
+    Root -.-> Worker["Worker<br/>Make changes and run tests"]
+    Root -.-> Researcher["Researcher<br/>Check documentation"]
+    Root -->|Can handle it directly| Integrate
+
+    Explorer --> Integrate["Root · Integrate and verify<br/>Combine results and check the final change"]
+    Worker --> Integrate
+    Researcher --> Integrate
+
+    Integrate --> Decision{"Does this change need<br/>independent review?"}
+    Decision -->|No| Done([Deliver the verified result])
+    Decision -->|Yes · Big or consequential change| Reviewer["Reviewer<br/>Check correctness, risks, and missing tests"]
+    Reviewer -->|Findings to address| Integrate
+    Reviewer -->|No unresolved findings| Done
+
+    classDef lead fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e
+    classDef helper fill:#f1f5f9,stroke:#64748b,color:#0f172a
+    classDef review fill:#fef3c7,stroke:#d97706,color:#78350f
+    classDef outcome fill:#dcfce7,stroke:#16a34a,color:#14532d
+    class Root,Integrate lead
+    class Explorer,Worker,Researcher helper
+    class Decision,Reviewer review
+    class Done outcome
 ```
+
+**How to read it:** Dashed arrows mean optional delegation. Use zero, one, or several helpers. Independent tasks can run in parallel; tasks that need another agent's findings wait for them. The root remains responsible for the final result.
+
+### Preferred models
+
+| Role | What it does | Model | Reasoning |
+| --- | --- | --- | --- |
+| **Root** | Plans, coordinates, integrates, and verifies | GPT-6.1 Sol | High |
+| **Explorer** | Reads and traces code | GPT-6.1 Sol | Medium |
+| **Worker** | Edits code and runs tests | GPT-6.1 Sol | Medium |
+| **Researcher** | Looks up authoritative documentation | GPT-6.1 Sol | Medium |
+| **Reviewer** | Independently reviews big or consequential changes | GPT-6 Astra | Extra high (`xhigh`) |
 
 These are preferred settings, not a claim that every account or host provides these models. The skill respects explicit model choices, checks host capabilities, and discloses fallbacks. It cannot switch the root model or enable missing delegation tools. Choose the preferred root model in your client if you want the pictured profile.
 
