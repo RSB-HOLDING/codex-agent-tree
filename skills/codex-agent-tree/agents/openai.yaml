@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Agent Tree"
+  short_description: "Selective delegation with one accountable integrator"
+  default_prompt: "Use $codex-agent-tree to complete this coding task, delegate only useful independent work, and verify the integrated result."
